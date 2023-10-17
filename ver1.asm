@@ -35,15 +35,18 @@ arr2: .space 40
 	.correct_main_size:
 	# Saving the correct size 
 	mv 	a0, s0
-	
+
+	# Reading values from the console and saving them in arr1
 	jal input_array 
 	
 	mv 	a0, s0
-	
+
+	# Reading values from arr1 and saving the squared values in arr2
 	jal make_new_array
 	
 	mv 	a0, s0
-	
+
+	# Writing the values in the console
 	jal output_array
 	
 	.end_main:
