@@ -53,4 +53,4 @@
     </tr>
 </table>
 
-![Спасибо за внимание](https://www.example.com/image.jpg)
+![Спасибо за внимание](39962a607d433ffe8c7144310d0ae008.jpg)
