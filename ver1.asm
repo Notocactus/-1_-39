@@ -1,4 +1,4 @@
-# Âàğèàíò 39
+# Variant 39
 
 .data
 
@@ -10,37 +10,33 @@ arr1: .space 40
 arr2: .space 40
 
 .text
-	# Ñîõğàíèì s0, ÷òîáû óäîâëåòâîğÿòü óñëîâèÿì 
-	# ...
-	# ...
-	
+	# array size 
 	la 	a0, n_prompt
 	li	a7, 4
 	ecall
 	li 	a7, 5
-	ecall	# Ñ÷èòàëè èíò - ğàçìåğ ìàññèâà
+	ecall	
 	
-	mv 	s0, a0  # Ñîõğàíèëè â "ïåğåìåííóş" s0
-	# Âûçîâåì ôóíêöèş ïğîâåğêè íà êîğğåòíîñòü ğàçìåğà ìàññèâà
-	# Íî ïåğåä ıòèì ïîëîæèì ïåğåìåííóş íà ñòåê
+	mv 	s0, a0  # Saving the size to s0
+	# Saving the number to stack 
 	addi 	sp, sp, -4
 	sw  	a0, (sp)
+	# Checking the limits
 	jal check_limits
-	addi 	sp sp 4 # "Ïî÷èñòèëè" òî, ÷òî ïîëîæèëè
-	# Ïğîâåğèì, ÷òî âåğíóëà ôóíêöèÿ
+	addi 	sp sp 4 # Cleaning up
 	li 	a1, 1
 	beq 	a0, a1, .correct_main_size
-	# Åñëè ïîïàëè ñşäà - çíà÷èò ğàçìåğ íå óäîâëåòâîğÿåò íóæíîìó
+	# Incorrect size branch
 	la 	a0, incorrect_size_info
 	li 	a7 4
 	ecall
-	j .end_main # Çàâåğøàåì ğàáîòó ïğîãğàììû
+	j .end_main # Shutting down the program
 	
 	.correct_main_size:
-	# Åñëè ïîïàëè ñşäà - çíà÷èò âñå ÷åòêî, ñ÷èòûâàåò ìàññèâ
+	# Saving the correct size 
 	mv 	a0, s0
 	
-	jal input_array
+	jal input_array 
 	
 	mv 	a0, s0
 	
@@ -58,13 +54,13 @@ arr2: .space 40
 
 .text
 multiply:
-	# Ôóíêöèÿ ïğèíèìàåò íà âõîä äâà ÷èñëà è óìíîæàåò îäíî íà äğóãîåş.
-	# Óìíîæåíèå ğåàëèçîâàíî ïğè ïîìîùè áèí. ñäâèãîâ
-	mulhu 	t1, a0, a0
-	bgtz 	t1,  mul_loop_end1
+	# The multiplication done with addition in a loop
+	lw	a0, (sp)
 	bgez 	a0, mul_continue
 	sub	a0, zero, a0
 	mul_continue:
+	mulhu 	t1, a0, a0
+	bgtz 	t1,  mul_loop_end1
 	mv 	t2, a0
 	mv	a4, t2
 	li 	a0, 0
@@ -77,6 +73,7 @@ multiply:
 	mul_loop_end1:
 	mv 	a0, zero
 	mul_loop_end2:
+	sw	a0, (sp)
 	ret
 
 .text 
@@ -88,25 +85,29 @@ make_new_array:
 	sw  	ra, (sp)
 	new_loop: 
 		lw	a0, (a1) 
+		addi 	sp, sp, -4
+		sw	a0, (sp)
 		jal 	multiply
+		lw	a0, (sp)
+		addi 	sp, sp, 4
 		sw	a0, (a2)
 		
 		addi	a1, a1, 4
 		addi	a2, a2, 4
 		addi	a3, a3, -1
 		bgtz	a3, new_loop
-	lw ra (sp)    # âîññòàíîâèì òåêóùèé ra
+	lw ra (sp)    # Ğ²Ğ¾ÑÑÑ‚Ğ°Ğ½Ğ¾Ğ²Ğ¸Ğ¼ Ñ‚ĞµĞºÑƒÑ‰Ğ¸Ğ¹ ra
 	addi 	sp, sp, 4
 	ret
 
 .text
 check_limits:
-	# Ôóíêöèÿ ïğîâåğÿåò, âõîäèò ëè ïåğåäàííîå ÷èñëî â ãğàíèöû îò 1 äî 10 âêëş÷èòåëüíî
-	# Åñëè óäîâëåòâîğÿåò óñëîâèş, âîçâğàùàåò 1(true), èíà÷å 0(false). Çíà÷åíèå êëàäåòñÿ â a0
+	# This function checks whether the size is >0 and <11
+	# If true returns 1, else 0 (a0) 
 	
-	# Ñ÷èòàåì äàííûå ñî ñòåêà
+	# Stack
 	mv a0, sp
-	lw a1, (a0)  # Çàãğóçèëè íàøå ÷èñëî
+	lw a1, (a0)  # Loading word
 	li a0, 1 # bool res = true
 	
 	li a2, 1
@@ -140,7 +141,7 @@ input_array:
 		addi	t0, t0, 4
 		addi 	a1, a1, -1
 		bgtz 	a1, input_loop
-	lw ra (sp)    # âîññòàíîâèì òåêóùèé ra
+	lw 	ra (sp)   # returning the ra of this program
 	addi 	sp, sp, 4
 	ret
 
